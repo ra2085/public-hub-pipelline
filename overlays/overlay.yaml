@@ -6,7 +6,7 @@ actions:
   - target: $
     update:
       servers:
-       - url: https://34.107.220.83.nip.io
+       - url: https://mocktarget.apigee.net
   - target: $.info
     update:
       x-proxy-postcf-fc-splunk: true
