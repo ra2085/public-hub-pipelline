@@ -1,0 +1,131 @@
+steps:
+- id: perms
+  name: "gcr.io/cloud-builders/git"
+  entrypoint: "chmod"
+  args: ["-v", "-R", "a+rw", "."]
+  dir: "/workspace"
+- name: 'gcr.io/cloud-builders/git'
+  args: ['clone', 'https://github.com/ra2085/public-hub-pipelline', '.']
+- name: ghcr.io/apigee/apigeecli:latest
+  id: "download spec"
+  entrypoint: 'sh'
+  args:
+  - -c
+  - |
+    export DECODED_API_NAME=$(echo -n $_APIHUB_EVENT | \
+    base64 -d)
+    export SPEC_PROJECT=$(echo -n $$DECODED_API_NAME | \
+    jq -r '.payload.name | split("/") | .[1]')
+    export SPEC_REGION=$(echo -n $$DECODED_API_NAME | \
+    jq -r '.payload.name | split("/") | .[3]')
+    export SPEC_NAME=$(echo -n $$DECODED_API_NAME | \
+    jq -r '.payload.name | split("/") | .[5]')
+    export SPEC_VERSION=$(echo -n $$DECODED_API_NAME | \
+    jq -r '.payload.name | split("/") | .[7]')
+    export SPEC_ID=$(echo -n $$DECODED_API_NAME | \
+    jq -r '.payload.name | split("/") | .[9]')
+    export SPEC_FILENAME=$(apigeecli apihub apis versions specs get \
+    -r $$SPEC_REGION \
+    -o $$SPEC_PROJECT \
+    -v $$SPEC_VERSION \
+    --api-id $$SPEC_NAME \
+    -s $$SPEC_ID \
+    --metadata-token | \
+    jq -r '.displayName')
+    export SPEC_FILE="/workspace/$$SPEC_FILENAME"
+    apigeecli apihub apis versions specs get \
+    -r $$SPEC_REGION \
+    -o $$SPEC_PROJECT \
+    -v $$SPEC_VERSION \
+    --api-id $$SPEC_NAME \
+    -s $$SPEC_ID \
+    -c --output $$SPEC_FILE \
+    --metadata-token
+    env > /workspace/build_vars
+- name: 'gcr.io/apigee-hw/apigee-go-gen:latest'
+  id: apply overlay
+  entrypoint: 'sh'
+  args:
+  - -c
+  - |
+    source /workspace/build_vars
+    export NEW_ENDPOINT="https://34.107.220.83.nip.io/$$SPEC_NAME"
+    export IS_MOCK=$(apigee-go-gen transform yaml-to-json \
+    --input $$SPEC_FILE | \
+    jq -r '(if has(".info.x-mock") then .info."x-mock" else false end) or (if has("servers") then false else true end)')
+    apigee-go-gen transform yaml-to-json \
+    --input $$SPEC_FILE | \
+    jq -r --arg url "$$NEW_ENDPOINT" 'if has("servers") then .servers += [{"url": $$url}] else . += {servers: [{"url": $$url}]} end' | \
+    apigee-go-gen transform json-to-yaml \
+    --output ./spec.yaml
+    apigee-go-gen transform oas-overlay \
+      --spec ./spec.yaml \
+      --overlay ./overlays/overlay.yaml \
+      --output ./overlaid.yaml
+    if [ $$IS_MOCK == true ]; then
+      apigee-go-gen mock oas \
+      --input ./overlaid.yaml \
+      --output "./out/apiproxies/$$SPEC_NAME.zip"
+    else
+      apigee-go-gen render apiproxy \
+      --template ./templates/oas3/apiproxy.yaml \
+      --set-oas spec=./overlaid.yaml \
+      --include ./templates/oas3/*.tmpl \
+      --output "./out/apiproxies/$$SPEC_NAME.zip" \
+      -v false
+    fi
+    env > /workspace/build_vars2
+- name: ghcr.io/apigee/apigeecli:latest
+  id: deploy proxy
+  entrypoint: 'sh'
+  args:
+  - -c
+  - |
+    source /workspace/build_vars
+    source /workspace/build_vars2
+    export V_TO_UPDATE=$(apigeecli apihub apis versions get \
+    -r $$SPEC_REGION \
+    -o $$SPEC_PROJECT \
+    -i $$SPEC_VERSION \
+    --api-id $$SPEC_NAME \
+    --metadata-token)
+    REV=$(apigeecli apis create bundle \
+    -p ./out/apiproxies/$$SPEC_NAME.zip \
+    -n $$SPEC_NAME --org $$SPEC_PROJECT \
+    --metadata-token --disable-check | jq ."revision" -r)
+    apigeecli apis deploy --wait \
+    --name $$SPEC_NAME \
+    --ovr --rev $$REV \
+    --org $$SPEC_PROJECT \
+    --env qa \
+    --metadata-token
+    export exists=$(apigeecli apihub deployments list \
+    -r $$SPEC_REGION \
+    -o $$SPEC_PROJECT \
+    -f display_name="$$SPEC_NAME" \
+    --metadata-token | \
+    jq -r 'if has("deployments") then .deployments[0] else "" end')
+    if [ -z "$$exists" ] ; then
+      export DEPLOYMENT_ID=$(apigeecli apihub deployments create \
+      -n "$$SPEC_NAME" \
+      --dep-type apigee \
+      -d "$$SPEC_NAME" \
+      --env-type development \
+      --endpoints "$$NEW_ENDPOINT" \
+      --resource-uri "https://console.cloud.google.com/apigee/proxies/$$SPEC_NAME/overview?project=$$SPEC_PROJECT" \
+      -r us-central1 \
+      -o $$SPEC_PROJECT \
+      --metadata-token | \
+      jq -r '.name')
+    else
+      export DEPLOYMENT_ID=$(echo "$$exists" | \
+      jq -r '.name')
+    fi
+    echo "$$V_TO_UPDATE" | jq -r --arg deploymentId "$$DEPLOYMENT_ID" 'if has("deployments") then .deployments += $deploymentId else . += {deployments: [$deploymentId]} end' > ./vtoupdate.json
+    apigeecli apihub apis versions update \
+    -r $$SPEC_REGION \
+    -o $$SPEC_PROJECT \
+    -i $$SPEC_VERSION \
+    --api-id $$SPEC_NAME \
+    -f ./vtoupdate.json \
+    --metadata-token
