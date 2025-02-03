@@ -49,7 +49,7 @@ steps:
   - -c
   - |
     source /workspace/build_vars
-    export NEW_ENDPOINT="https://34.107.220.83.nip.io/$$SPEC_NAME"
+    export NEW_ENDPOINT="https://api-$$SPEC_PROJECT.apiservices.dev/$$SPEC_NAME"
     export IS_MOCK=$(apigee-go-gen transform yaml-to-json \
     --input $$SPEC_FILE | \
     jq -r '(if has(".info.x-mock") then .info."x-mock" else false end) or (if has("servers") then false else true end)')
