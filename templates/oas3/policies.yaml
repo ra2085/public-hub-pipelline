@@ -12,6 +12,32 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
+- SpikeArrest:
+    .continueOnError: false
+    .enabled: true
+    .name: SA-ByClientIp
+    DisplayName: SA-ByClientIp
+    Properties: {}
+    Identifier:
+      .ref: client.ip
+    # The example below sets the Rate value dynamically from the render context
+    # You can pass the value like this --set spike_arrest_rate=300pm in the command line
+    # If the value is unset, it defaults to 100pm
+    Rate: {{ or ($.Values.spec.info.x-apigee-spike-arrest-rate) "100pm" }}
+- FlowCallout:
+    .continueOnError: false
+    .enabled: true
+    .name: FC-CloudLogging
+    DisplayName: FC-CloudLogging
+    Properties: {}
+    SharedFlowBundle: apigee-logger-v1
+- FlowCallout:
+    .continueOnError: false
+    .enabled: true
+    .name: FC-AuthorizeIdPToken
+    DisplayName: FC-AuthorizeIdPToken
+    Properties: {}
+    SharedFlowBundle: authorize-idp-access-tokens
 - OASValidation:
     .continueOnError: false
     .enabled: true
@@ -37,5 +63,3 @@
         StatusCode: 404
         ReasonPhrase: Not found
     IgnoreUnresolvedVariables: true
-- {{ include "./policies/message-logging.yaml" . | indent 2 | trim }}
-- {{ include "./policies/spike-arrest.yaml" . | indent 2 | trim }}

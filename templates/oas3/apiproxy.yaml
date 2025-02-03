@@ -1,4 +1,4 @@
-#  Copyright 2024 Google LLC
+#  Copyright 2025 Google LLC
 #
 #  Licensed under the Apache License, Version 2.0 (the "License");
 #  you may not use this file except in compliance with the License.
@@ -26,7 +26,11 @@ ProxyEndpoints:
         .name: PreFlow
         Request:
           - Step:
-              Name: Spike-Arrest
+              Name: SA-ByClientIp
+        #{{ if index $.Values.spec.info "x-apigee-authz-idp" }}
+          - Step:
+              Name: FC-AuthorizeIdPToken
+        #{{end}}
           - Step:
               Name: OAS-Validate
       Flows:
@@ -51,11 +55,13 @@ ProxyEndpoints:
               - Step:
                   Name: RF-CatchAll
       PostClientFlow:
-        .name: SamplePostClientFlow
+        .name: PostClientFlow
         Description: Processed after the response is sent back to the client.
         Response:
+        #{{ if index $.Values.spec.info "x-apigee-logging" }}
           Step:
-            Name: ML-Logging-OK
+            Name: FC-CloudLogging
+        #{{end}}
       HTTPProxyConnection:
         BasePath: {{ include "get_basepath" (index $.Values.spec.servers 0 "url") }}
       RouteRule:
@@ -79,7 +85,3 @@ Resources:
       #{{ os_writefile "./openapi.yaml" $.Values.spec_string }}
       #{{ remove_oas_extensions "./openapi.yaml" }}
       Path: ./openapi.yaml
-  - Resource:
-      Type: properties
-      #{{ os_copyfile "./test.properties" "./resources/test.properties" }}
-      Path: ./test.properties
