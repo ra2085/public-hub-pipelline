@@ -24,6 +24,7 @@
     # You can pass the value like this --set spike_arrest_rate=300pm in the command line
     # If the value is unset, it defaults to 100pm
     Rate: {{ or (index $.Values.spec.info "x-apigee-spike-arrest-rate") "100pm" }}
+#{{ if index $.Values.spec.info "x-apigee-logging" }}
 - FlowCallout:
     .continueOnError: false
     .enabled: true
@@ -31,6 +32,7 @@
     DisplayName: FC-CloudLogging
     Properties: {}
     SharedFlowBundle: apigee-logger-v1
+#{{end}}
 #{{ if index $.Values.spec.info "x-apigee-authz-idp" }}
 - FlowCallout:
     .continueOnError: false
