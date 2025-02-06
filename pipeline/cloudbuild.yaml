@@ -129,3 +129,5 @@ steps:
     --api-id $$SPEC_NAME \
     -f ./vtoupdate.json \
     --metadata-token
+options:
+  logging: CLOUD_LOGGING_ONLY
