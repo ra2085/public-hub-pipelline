@@ -19,6 +19,6 @@ limitations under the License.
   <DisplayName>ML-CloudLogging</DisplayName>
   <CloudLogging>
     <LogName>projects/{organization.name}/logs/apigee</LogName>
-    <Message contentType="application/json">{"proxyName":"{apiproxy.name}","messageid":"{messageid}","content":"{response.content}"}</Message>
+    <Message contentType="application/json">{"proxyName":"{apiproxy.name}","messageid":"{messageid}","content":"{escapeJSON(response.content)}"}</Message>
   </CloudLogging>
 </MessageLogging>
