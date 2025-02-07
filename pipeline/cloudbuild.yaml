@@ -97,7 +97,7 @@ steps:
     --name $$SPEC_NAME \
     --ovr --rev $$REV \
     --org $$SPEC_PROJECT \
-    --env qa \
+    --env eval \
     --metadata-token
     export exists=$(apigeecli apihub deployments list \
     -r $$SPEC_REGION \
