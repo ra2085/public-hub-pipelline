@@ -31,7 +31,7 @@
     .name: FC-CloudLogging
     DisplayName: FC-CloudLogging
     Properties: {}
-    SharedFlowBundle: apigee-logger-v1
+    SharedFlowBundle: cloud-logging-v1
 #{{end}}
 #{{ if index $.Values.spec.info "x-apigee-authz-idp" }}
 - FlowCallout:
