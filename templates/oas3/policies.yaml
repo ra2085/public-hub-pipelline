@@ -49,6 +49,18 @@
     DisplayName: OAS-Validate
     Source: request
     OASResource: oas://openapi.yaml
+#{{ range $name, $scheme := $.Values.spec.components.securitySchemes }}
+#{{ if eq $scheme.type "apiKey" }}
+- VerifyAPIKey:
+    .continueOnError: false
+    .enabled: true
+    .name: VA-VerifyAPIKey
+    DisplayName: VA-VerifyAPIKey
+    Properties: {}
+    APIKey:
+      .ref: request.{{ if eq $scheme.in "query" }}queryparam{{ else }}{{ $scheme.in }}{{ end }}.{{ $scheme.name }}
+#{{ end }}
+#{{ end }}
 - RaiseFault:
     .continueOnError: false
     .enabled: true
