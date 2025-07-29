@@ -31,6 +31,12 @@ ProxyEndpoints:
           - Step:
               Name: FC-AuthorizeIdPToken
         #{{end}}
+        #{{ range $name, $scheme := $.Values.spec.components.securitySchemes }}
+        #{{ if eq $scheme.type "apiKey" }}
+          - Step:
+              Name: VA-VerifyAPIKey
+        #{{ end }}
+        #{{ end }}
           - Step:
               Name: OAS-Validate
       Flows:
