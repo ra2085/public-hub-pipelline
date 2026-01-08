@@ -53,6 +53,48 @@ ProxyEndpoints:
         - Flow:
             .name: {{ $opItem.operationId }}
             Condition: (proxy.pathsuffix MatchesPath "{{  regexReplaceAll "{[^}]*}" $path "*" }}") and (request.verb = "{{ $verb | upper }}")
+            Request:
+              #{{- if index $opItem "x-apigee-assign-message" }}
+              #{{- range $index, $policy := index $opItem "x-apigee-assign-message" }}
+              #{{- $assignTo := $policy.AssignTo | default dict }}
+              #{{- $type := $assignTo.type | default "request" }}
+              #{{- if eq $type "request" }}
+              - Step:
+                  Name: {{ $policy.name | default (printf "AM-%s-%d" $opItem.operationId $index) }}
+              #{{- end }}
+              #{{- end }}
+              #{{- end }}
+              #{{- if index $opItem "x-apigee-basic-authentication" }}
+              #{{- range $index, $policy := index $opItem "x-apigee-basic-authentication" }}
+              #{{- $assignTo := $policy.assignTo | default dict }}
+              #{{- $type := $assignTo.type | default "request" }}
+              #{{- if eq $type "request" }}
+              - Step:
+                  Name: {{ $policy.name | default (printf "BA-%s-%d" $opItem.operationId $index) }}
+              #{{- end }}
+              #{{- end }}
+              #{{- end }}
+            Response:
+              #{{- if index $opItem "x-apigee-assign-message" }}
+              #{{- range $index, $policy := index $opItem "x-apigee-assign-message" }}
+              #{{- $assignTo := $policy.AssignTo | default dict }}
+              #{{- $type := $assignTo.type | default "request" }}
+              #{{- if eq $type "response" }}
+              - Step:
+                  Name: {{ $policy.name | default (printf "AM-%s-%d" $opItem.operationId $index) }}
+              #{{- end }}
+              #{{- end }}
+              #{{- end }}
+              #{{- if index $opItem "x-apigee-basic-authentication" }}
+              #{{- range $index, $policy := index $opItem "x-apigee-basic-authentication" }}
+              #{{- $assignTo := $policy.assignTo | default dict }}
+              #{{- $type := $assignTo.type | default "request" }}
+              #{{- if eq $type "response" }}
+              - Step:
+                  Name: {{ $policy.name | default (printf "BA-%s-%d" $opItem.operationId $index) }}
+              #{{- end }}
+              #{{- end }}
+              #{{- end }}
         #{{- end }}
       #{{- end }}
         - Flow:

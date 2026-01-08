@@ -61,6 +61,129 @@
       .ref: request.{{ if eq $scheme.in "query" }}queryparam{{ else }}{{ $scheme.in }}{{ end }}.{{ $scheme.name }}
 #{{ end }}
 #{{ end }}
+
+#{{ range $path, $pathItem := $.Values.spec.paths }}
+#{{ range $verb, $opItem := $pathItem }}
+#{{ if index $opItem "x-apigee-assign-message" }}
+#{{ range $index, $policy := index $opItem "x-apigee-assign-message" }}
+- AssignMessage:
+    .continueOnError: {{ $policy.continueOnError | default "false" }}
+    .enabled: {{ $policy.enabled | default "true" }}
+    .name: {{ $policy.name | default (printf "AM-%s-%d" $opItem.operationId $index) }}
+    DisplayName: {{ $policy.displayName | default (printf "AM-%s-%d" $opItem.operationId $index) }}
+    Properties: {}
+#{{ if $policy.AssignTo }}
+    AssignTo:
+      .createNew: {{ $policy.AssignTo.createNew | default "false" }}
+      .transport: {{ $policy.AssignTo.transport | default "http" }}
+      .type: {{ $policy.AssignTo.type | default "request" }}
+      #{{ if $policy.AssignTo.text }}
+      text: {{ $policy.AssignTo.text }}
+      #{{ end }}
+#{{ end }}
+#{{ if $policy.IgnoreUnresolvedVariables }}
+    IgnoreUnresolvedVariables: {{ $policy.IgnoreUnresolvedVariables }}
+#{{ end }}
+#{{ if $policy.Set }}
+    Set:
+#{{ if $policy.Set.Headers }}
+      Headers:
+#{{ range $hIndex, $header := $policy.Set.Headers }}
+        - Header:
+            .name: {{ $header.name }}
+            text: {{ $header.value }}
+#{{ end }}
+#{{ end }}
+#{{ if $policy.Set.QueryParams }}
+      QueryParams:
+#{{ range $qIndex, $query := $policy.Set.QueryParams }}
+        - QueryParam:
+            .name: {{ $query.name }}
+            text: {{ $query.value }}
+#{{ end }}
+#{{ end }}
+#{{ if $policy.Set.FormParams }}
+      FormParams:
+#{{ range $fIndex, $form := $policy.Set.FormParams }}
+        - FormParam:
+            .name: {{ $form.name }}
+            text: {{ $form.value }}
+#{{ end }}
+#{{ end }}
+#{{ if $policy.Set.Payload }}
+      Payload:
+        .contentType: {{ $policy.Set.Payload.contentType | default "application/json" }}
+        #{{ if $policy.Set.Payload.variablePrefix }}
+        .variablePrefix: {{ $policy.Set.Payload.variablePrefix }}
+        #{{ end }}
+        #{{ if $policy.Set.Payload.variableSuffix }}
+        .variableSuffix: {{ $policy.Set.Payload.variableSuffix }}
+        #{{ end }}
+        text: |- 
+          {{ $policy.Set.Payload.value | nindent 10 }}
+#{{ end }}
+#{{ if $policy.Set.Verb }}
+      Verb: {{ $policy.Set.Verb }}
+#{{ end }}
+#{{ if $policy.Set.Path }}
+      Path: {{ $policy.Set.Path }}
+#{{ end }}
+#{{ end }}
+#{{ if $policy.AssignVariable }}
+#{{ range $vIndex, $variable := $policy.AssignVariable }}
+    - AssignVariable:
+        Name: {{ $variable.name }}
+        #{{ if $variable.value }}
+        Value: {{ $variable.value }}
+        #{{ end }}
+        #{{ if $variable.ref }}
+        Ref: {{ $variable.ref }}
+        #{{ end }}
+#{{ end }}
+#{{ end }}
+#{{ end }}
+#{{ end }}
+#{{ if index $opItem "x-apigee-basic-authentication" }}
+#{{ range $index, $policy := index $opItem "x-apigee-basic-authentication" }}
+- BasicAuthentication:
+    .continueOnError: {{ $policy.continueOnError | default "false" }}
+    .enabled: {{ $policy.enabled | default "true" }}
+    .name: {{ $policy.name | default (printf "BA-%s-%d" $opItem.operationId $index) }}
+    DisplayName: {{ $policy.displayName | default (printf "BA-%s-%d" $opItem.operationId $index) }}
+    Operation: {{ $policy.operation | default "Encode" }}
+    IgnoreUnresolvedVariables: {{ $policy.IgnoreUnresolvedVariables | default "false" }}
+#{{ if $policy.user }}
+    User:
+      #{{ if $policy.user.ref }}
+      .ref: {{ $policy.user.ref }}
+      #{{ end }}
+      #{{ if $policy.user.value }}
+      text: {{ $policy.user.value }}
+      #{{ end }}
+#{{ end }}
+#{{ if $policy.password }}
+    Password:
+      #{{ if $policy.password.ref }}
+      .ref: {{ $policy.password.ref }}
+      #{{ end }}
+      #{{ if $policy.password.value }}
+      text: {{ $policy.password.value }}
+      #{{ end }}
+#{{ end }}
+#{{ if $policy.assignTo }}
+    AssignTo:
+      .createNew: {{ $policy.assignTo.createNew | default "false" }}
+      #{{ if $policy.assignTo.value }}
+      text: {{ $policy.assignTo.value }}
+      #{{ end }}
+#{{ end }}
+#{{ if $policy.source }}
+    Source: {{ $policy.source }}
+#{{ end }}
+#{{ end }}
+#{{ end }}
+#{{ end }}
+#{{ end }}
 - RaiseFault:
     .continueOnError: false
     .enabled: true

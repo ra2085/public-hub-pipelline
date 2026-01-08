@@ -1,0 +1,22 @@
+openapi: 3.0.0
+info:
+  title: Test Service (AssignMessage)
+  version: 1.0.0
+  description: Test service for AssignMessage extension
+servers:
+  - url: https://api.example.com
+paths:
+  /hello:
+    get:
+      operationId: getHello
+      responses:
+        '200':
+          description: OK
+      x-apigee-assign-message:
+        - name: "AM-SetHeader"
+          AssignTo:
+            type: "request"
+          Set:
+            Headers:
+              - name: "X-Hello"
+                value: "World"

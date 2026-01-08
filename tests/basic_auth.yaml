@@ -1,0 +1,25 @@
+openapi: 3.0.0
+info:
+  title: Test Service (BasicAuth)
+  version: 1.0.0
+  description: Test service for BasicAuthentication extension
+servers:
+  - url: https://api.example.com
+paths:
+  /auth:
+    post:
+      operationId: authPost
+      responses:
+        '200':
+          description: OK
+      x-apigee-basic-authentication:
+        - name: "BA-Encode"
+          operation: "Encode"
+          user:
+            ref: "request.queryparam.user"
+          password:
+            ref: "request.queryparam.pass"
+          assignTo:
+            createNew: true
+            type: "request"
+          source: "request.header.Authorization"
