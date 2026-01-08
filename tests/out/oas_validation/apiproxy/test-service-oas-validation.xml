@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<APIProxy revision="1" name="test-service-oas-validation">
+  <DisplayName>Test Service (OAS Validation)</DisplayName>
+  <Description>Test service for OAS Validation extension</Description>
+</APIProxy>

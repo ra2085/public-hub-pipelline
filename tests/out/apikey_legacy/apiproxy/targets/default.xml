@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<TargetEndpoint name="default">
+  <PreFlow name=""/>
+  <Flows/>
+  <PostFlow name=""/>
+  <HTTPTargetConnection>
+    <URL>https://api.example.com</URL>
+    <SSLInfo>
+      <Enabled>true</Enabled>
+      <Enforce>true</Enforce>
+      <IgnoreValidationErrors>true</IgnoreValidationErrors>
+    </SSLInfo>
+  </HTTPTargetConnection>
+</TargetEndpoint>

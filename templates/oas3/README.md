@@ -31,6 +31,7 @@ paths:
 | Field | Description | Default |
 | :--- | :--- | :--- |
 | `name` | Name of the policy. | `AM-<OperationId>-<Index>` |
+| `condition` | Flow Condition string. | |
 | `AssignTo` | Target for the assignment. | |
 | `AssignTo.type` | Flow to attach the policy to (`request` or `response`). | `request` |
 | `Set` | standard AssignMessage `Set` configuration. | |
@@ -49,6 +50,7 @@ paths:
     post:
       x-apigee-basic-authentication:
         - name: "BA-Encode"
+          condition: "request.queryparam.auth = 'true'"
           operation: "Encode"
           user:
             ref: "request.queryparam.user"
@@ -65,6 +67,7 @@ paths:
 | Field | Description | Default |
 | :--- | :--- | :--- |
 | `name` | Name of the policy. | `BA-<OperationId>-<Index>` |
+| `condition` | Flow Condition string. | |
 | `operation` | `Encode` or `Decode`. | `Encode` |
 | `user.ref` | Variable ref for username. | |
 | `user.value` | Static value for username. | |
@@ -76,8 +79,86 @@ paths:
 | `source` | Source variable for Decode. | |
 
 
+### `x-apigee-oas-validation`
+
+Controls the `OAS-Validate` policy in the PreFlow.
+
+**Usage:**
+
+```yaml
+info:
+  title: My API
+  x-apigee-oas-validation:
+    enabled: true
+    condition: "request.header.validate = 'true'"
+```
+
+**Configuration Fields:**
+
+| Field | Description | Default |
+| :--- | :--- | :--- |
+| `enabled` | Enable/Disable the policy. | `true` |
+| `condition` | Flow Condition string. | |
+
+### `x-apigee-verify-api-key`
+
+Controls the `VerifyAPIKey` policy configuration for API Key security schemes.
+
+**Usage:**
+
+```yaml
+components:
+  securitySchemes:
+    MyApiKey:
+      type: apiKey
+      in: header
+      name: X-API-KEY
+      x-apigee-verify-api-key:
+        name: "VA-CustomName"
+        continueOnError: true
+```
+
+**Configuration Fields:**
+
+| Field | Description | Default |
+| :--- | :--- | :--- |
+| `name` | Name of the policy. | `VA-<SchemeName>` |
+| `enabled` | Enable/Disable the policy. | `true` |
+| `continueOnError` | Boolean flag. | `false` |
+| `displayName` | Policy display name. | `VA-<SchemeName>` |
+
+### `x-apigee-assign-message` (Global)
+
+Policies defined in the `info` object are attached to the `PreFlow`.
+
+```yaml
+info:
+  title: My API
+  x-apigee-assign-message:
+    - name: "AM-Global-SetHeader"
+      flow: preflow # default, or 'postflow'
+      assignTo:
+        type: request # or response
+      AssignVariable:
+        Name: "global_var"
+        Value: "true"
+```
+
+### `x-apigee-basic-authentication` (Global)
+
+Can also be attached globally to `PreFlow` or `PostFlow`.
+
+```yaml
+info:
+  x-apigee-basic-authentication:
+    - name: "BA-Global-Auth"
+      flow: preflow
+      assignTo:
+        type: request
+      ...
+```
+
 ### Other Extensions
 
--   `x-apigee-spike-arrest-rate` (Info level): Sets the rate for the Spike Arrest policy.
--   `x-apigee-logging` (Info level): Enables Cloud Logging.
--   `x-apigee-authz-idp` (Info level): Enables IDP Token Authorization.
+
+

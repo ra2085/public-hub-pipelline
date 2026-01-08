@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<BasicAuthentication continueOnError="false" enabled="true" name="BA-PreFlow-Request">
+  <DisplayName>BA-Global-0</DisplayName>
+  <Operation>Encode</Operation>
+  <IgnoreUnresolvedVariables>false</IgnoreUnresolvedVariables>
+  <User ref="request.header.user" value="&lt;no value&gt;"/>
+  <Password ref="request.header.password" value="&lt;no value&gt;"/>
+  <AssignTo createNew="false" value="&lt;no value&gt;"/>
+  <Source>&lt;no value&gt;</Source>
+</BasicAuthentication>

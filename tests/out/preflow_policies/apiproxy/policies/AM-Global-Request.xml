@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<AssignMessage continueOnError="false" enabled="true" name="AM-Global-Request">
+  <DisplayName>AM-Global-0</DisplayName>
+  <Properties/>
+  <IgnoreUnresolvedVariables>true</IgnoreUnresolvedVariables>
+  <AssignVariable>
+    <Name>global_request_var</Name>
+    <Value>true</Value>
+  </AssignVariable>
+</AssignMessage>

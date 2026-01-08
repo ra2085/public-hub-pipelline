@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<OASValidation continueOnError="false" enabled="true" name="OAS-Validate">
+  <DisplayName>OAS-Validate</DisplayName>
+  <Source>request</Source>
+  <OASResource>oas://openapi.yaml</OASResource>
+</OASValidation>

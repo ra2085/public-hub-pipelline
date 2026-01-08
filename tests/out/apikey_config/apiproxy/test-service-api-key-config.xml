@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<APIProxy revision="1" name="test-service-api-key-config">
+  <DisplayName>Test Service (API Key Config)</DisplayName>
+  <Description>Test service for configured API Key validation</Description>
+</APIProxy>

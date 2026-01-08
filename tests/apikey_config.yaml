@@ -1,0 +1,24 @@
+openapi: 3.0.0
+info:
+  title: Test Service (API Key Config)
+  version: 1.0.0
+  description: Test service for configured API Key validation
+servers:
+  - url: https://api.example.com
+paths:
+  /test:
+    get:
+      operationId: getTest
+      responses:
+        '200':
+          description: OK
+components:
+  securitySchemes:
+    CustomKey:
+      type: apiKey
+      in: query
+      name: apikey
+      x-apigee-verify-api-key:
+        name: "VA-CustomCheck"
+        displayName: "Checking API Key"
+        continueOnError: true

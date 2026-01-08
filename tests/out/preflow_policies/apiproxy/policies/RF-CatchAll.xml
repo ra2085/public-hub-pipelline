@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<RaiseFault continueOnError="false" enabled="true" name="RF-CatchAll">
+  <DisplayName>RF-CatchAll</DisplayName>
+  <FaultResponse>
+    <Set>
+      <Payload contentType="application/json">{
+   "status": 404
+   "error": "NotFound"
+   "message": "resource not found"
+}</Payload>
+      <StatusCode>404</StatusCode>
+      <ReasonPhrase>Not found</ReasonPhrase>
+    </Set>
+  </FaultResponse>
+  <IgnoreUnresolvedVariables>true</IgnoreUnresolvedVariables>
+</RaiseFault>

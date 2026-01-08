@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ProxyEndpoint name="default">
+  <PreFlow name="PreFlow">
+    <Request>
+      <Step>
+        <Name>VA-CustomCheck</Name>
+      </Step>
+      <Step>
+        <Name>OAS-Validate</Name>
+      </Step>
+    </Request>
+  </PreFlow>
+  <Flows>
+    <Flow name="getTest">
+      <Condition>(proxy.pathsuffix MatchesPath "/test") and (request.verb = "GET")</Condition>
+      <Request/>
+      <Response/>
+    </Flow>
+    <Flow name="CatchAll">
+      <Request>
+        <Step>
+          <Name>RF-CatchAll</Name>
+        </Step>
+      </Request>
+    </Flow>
+  </Flows>
+  <PostClientFlow name="PostClientFlow">
+    <Description>Processed after the response is sent back to the client.</Description>
+    <Response/>
+  </PostClientFlow>
+  <HTTPProxyConnection>
+    <BasePath>/</BasePath>
+  </HTTPProxyConnection>
+  <RouteRule name="default">
+    <TargetEndpoint>default</TargetEndpoint>
+  </RouteRule>
+</ProxyEndpoint>

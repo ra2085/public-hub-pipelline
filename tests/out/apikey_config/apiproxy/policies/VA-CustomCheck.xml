@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<VerifyAPIKey continueOnError="true" enabled="true" name="VA-CustomCheck">
+  <DisplayName>Checking API Key</DisplayName>
+  <Properties/>
+  <APIKey ref="request.queryparam.apikey"/>
+</VerifyAPIKey>

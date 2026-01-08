@@ -1,0 +1,27 @@
+openapi: 3.0.0
+info:
+  title: Test Service (PreFlow Policies)
+  version: 1.0.0
+  description: Test service for global PreFlow policies
+  x-apigee-assign-message:
+    - name: "AM-Global-Request"
+      assignTo:
+        type: request
+      AssignVariable:
+        Name: "global_request_var"
+        Value: "true"
+    - name: "AM-Global-Response"
+      assignTo:
+        type: response
+      AssignVariable:
+        Name: "global_response_var"
+        Value: "true"
+servers:
+  - url: https://api.example.com
+paths:
+  /test:
+    get:
+      operationId: getTest
+      responses:
+        '200':
+          description: OK

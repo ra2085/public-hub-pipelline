@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<APIProxy revision="1" name="test-service-postflow-policies">
+  <DisplayName>Test Service (PostFlow Policies)</DisplayName>
+  <Description>Test service for global PostFlow policies</Description>
+</APIProxy>

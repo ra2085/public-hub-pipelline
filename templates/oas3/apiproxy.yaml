@@ -25,20 +25,158 @@ ProxyEndpoints:
       PreFlow:
         .name: PreFlow
         Request:
-          - Step:
-              Name: SA-ByClientIp
-        #{{ if index $.Values.spec.info "x-apigee-authz-idp" }}
-          - Step:
-              Name: FC-AuthorizeIdPToken
-        #{{end}}
+
+
         #{{ range $name, $scheme := $.Values.spec.components.securitySchemes }}
         #{{ if eq $scheme.type "apiKey" }}
+        #{{ $config := $scheme | dig "x-apigee-verify-api-key" dict }}
+        #{{ if $config | dig "enabled" true }}
           - Step:
-              Name: VA-VerifyAPIKey
+              Name: {{ $config.name | default (printf "VA-%s" $name) }}
         #{{ end }}
         #{{ end }}
+        #{{ end }}
+        #{{ $oasValidation := $.Values.spec.info | dig "x-apigee-oas-validation" dict }}
+        #{{ if $oasValidation | dig "enabled" true }}
           - Step:
               Name: OAS-Validate
+              #{{ if $oasValidation.condition }}
+              Condition: {{ $oasValidation.condition }}
+              #{{ end }}
+        #{{ end }}
+        #{{- if index $.Values.spec.info "x-apigee-assign-message" }}
+        #{{- range $index, $policy := index $.Values.spec.info "x-apigee-assign-message" }}
+        #{{- $flow := $policy.flow | default "preflow" }}
+        #{{- if ne $flow "postflow" }}
+        #{{- $assignTo := $policy.assignTo | default dict }}
+        #{{- $type := $assignTo.type | default "request" }}
+        #{{- if eq $type "request" }}
+          - Step:
+              Name: {{ $policy.name | default (printf "AM-Global-%d" $index) }}
+              #{{- if $policy.condition }}
+              Condition: {{ $policy.condition }}
+              #{{- end }}
+        #{{- end }}
+        #{{- end }}
+        #{{- end }}
+        #{{- end }}
+        #{{- if index $.Values.spec.info "x-apigee-basic-authentication" }}
+        #{{- range $index, $policy := index $.Values.spec.info "x-apigee-basic-authentication" }}
+        #{{- $flow := $policy.flow | default "preflow" }}
+        #{{- if ne $flow "postflow" }}
+        #{{- $assignTo := $policy.assignTo | default dict }}
+        #{{- $type := $assignTo.type | default "request" }}
+        #{{- if eq $type "request" }}
+          - Step:
+              Name: {{ $policy.name | default (printf "BA-Global-%d" $index) }}
+              #{{- if $policy.condition }}
+              Condition: {{ $policy.condition }}
+              #{{- end }}
+        #{{- end }}
+        #{{- end }}
+        #{{- end }}
+        #{{- end }}
+        Response:
+        #{{- if index $.Values.spec.info "x-apigee-assign-message" }}
+        #{{- range $index, $policy := index $.Values.spec.info "x-apigee-assign-message" }}
+        #{{- $flow := $policy.flow | default "preflow" }}
+        #{{- if ne $flow "postflow" }}
+        #{{- $assignTo := $policy.assignTo | default dict }}
+        #{{- $type := $assignTo.type | default "request" }}
+        #{{- if eq $type "response" }}
+          - Step:
+              Name: {{ $policy.name | default (printf "AM-Global-%d" $index) }}
+              #{{- if $policy.condition }}
+              Condition: {{ $policy.condition }}
+              #{{- end }}
+        #{{- end }}
+        #{{- end }}
+        #{{- end }}
+        #{{- end }}
+        #{{- if index $.Values.spec.info "x-apigee-basic-authentication" }}
+        #{{- range $index, $policy := index $.Values.spec.info "x-apigee-basic-authentication" }}
+        #{{- $flow := $policy.flow | default "preflow" }}
+        #{{- if ne $flow "postflow" }}
+        #{{- $assignTo := $policy.assignTo | default dict }}
+        #{{- $type := $assignTo.type | default "request" }}
+        #{{- if eq $type "response" }}
+          - Step:
+              Name: {{ $policy.name | default (printf "BA-Global-%d" $index) }}
+              #{{- if $policy.condition }}
+              Condition: {{ $policy.condition }}
+              #{{- end }}
+        #{{- end }}
+        #{{- end }}
+        #{{- end }}
+        #{{- end }}
+      PostFlow:
+        .name: PostFlow
+        Request:
+        #{{- if index $.Values.spec.info "x-apigee-assign-message" }}
+        #{{- range $index, $policy := index $.Values.spec.info "x-apigee-assign-message" }}
+        #{{- $flow := $policy.flow | default "preflow" }}
+        #{{- if eq $flow "postflow" }}
+        #{{- $assignTo := $policy.assignTo | default dict }}
+        #{{- $type := $assignTo.type | default "request" }}
+        #{{- if eq $type "request" }}
+          - Step:
+              Name: {{ $policy.name | default (printf "AM-Global-%d" $index) }}
+              #{{- if $policy.condition }}
+              Condition: {{ $policy.condition }}
+              #{{- end }}
+        #{{- end }}
+        #{{- end }}
+        #{{- end }}
+        #{{- end }}
+        #{{- if index $.Values.spec.info "x-apigee-basic-authentication" }}
+        #{{- range $index, $policy := index $.Values.spec.info "x-apigee-basic-authentication" }}
+        #{{- $flow := $policy.flow | default "preflow" }}
+        #{{- if eq $flow "postflow" }}
+        #{{- $assignTo := $policy.assignTo | default dict }}
+        #{{- $type := $assignTo.type | default "request" }}
+        #{{- if eq $type "request" }}
+          - Step:
+              Name: {{ $policy.name | default (printf "BA-Global-%d" $index) }}
+              #{{- if $policy.condition }}
+              Condition: {{ $policy.condition }}
+              #{{- end }}
+        #{{- end }}
+        #{{- end }}
+        #{{- end }}
+        #{{- end }}
+        Response:
+        #{{- if index $.Values.spec.info "x-apigee-assign-message" }}
+        #{{- range $index, $policy := index $.Values.spec.info "x-apigee-assign-message" }}
+        #{{- $flow := $policy.flow | default "preflow" }}
+        #{{- if eq $flow "postflow" }}
+        #{{- $assignTo := $policy.assignTo | default dict }}
+        #{{- $type := $assignTo.type | default "request" }}
+        #{{- if eq $type "response" }}
+          - Step:
+              Name: {{ $policy.name | default (printf "AM-Global-%d" $index) }}
+              #{{- if $policy.condition }}
+              Condition: {{ $policy.condition }}
+              #{{- end }}
+        #{{- end }}
+        #{{- end }}
+        #{{- end }}
+        #{{- end }}
+        #{{- if index $.Values.spec.info "x-apigee-basic-authentication" }}
+        #{{- range $index, $policy := index $.Values.spec.info "x-apigee-basic-authentication" }}
+        #{{- $flow := $policy.flow | default "preflow" }}
+        #{{- if eq $flow "postflow" }}
+        #{{- $assignTo := $policy.assignTo | default dict }}
+        #{{- $type := $assignTo.type | default "request" }}
+        #{{- if eq $type "response" }}
+          - Step:
+              Name: {{ $policy.name | default (printf "BA-Global-%d" $index) }}
+              #{{- if $policy.condition }}
+              Condition: {{ $policy.condition }}
+              #{{- end }}
+        #{{- end }}
+        #{{- end }}
+        #{{- end }}
+        #{{- end }}
       Flows:
       #{{- range $path, $pathItem := $.Values.spec.paths }}
         #{{- range $verb, $opItem := $pathItem }}
@@ -61,6 +199,9 @@ ProxyEndpoints:
               #{{- if eq $type "request" }}
               - Step:
                   Name: {{ $policy.name | default (printf "AM-%s-%d" $opItem.operationId $index) }}
+                  #{{- if $policy.condition }}
+                  Condition: {{ $policy.condition }}
+                  #{{- end }}
               #{{- end }}
               #{{- end }}
               #{{- end }}
@@ -71,6 +212,9 @@ ProxyEndpoints:
               #{{- if eq $type "request" }}
               - Step:
                   Name: {{ $policy.name | default (printf "BA-%s-%d" $opItem.operationId $index) }}
+                  #{{- if $policy.condition }}
+                  Condition: {{ $policy.condition }}
+                  #{{- end }}
               #{{- end }}
               #{{- end }}
               #{{- end }}
@@ -82,6 +226,9 @@ ProxyEndpoints:
               #{{- if eq $type "response" }}
               - Step:
                   Name: {{ $policy.name | default (printf "AM-%s-%d" $opItem.operationId $index) }}
+                  #{{- if $policy.condition }}
+                  Condition: {{ $policy.condition }}
+                  #{{- end }}
               #{{- end }}
               #{{- end }}
               #{{- end }}
@@ -92,6 +239,9 @@ ProxyEndpoints:
               #{{- if eq $type "response" }}
               - Step:
                   Name: {{ $policy.name | default (printf "BA-%s-%d" $opItem.operationId $index) }}
+                  #{{- if $policy.condition }}
+                  Condition: {{ $policy.condition }}
+                  #{{- end }}
               #{{- end }}
               #{{- end }}
               #{{- end }}
@@ -106,10 +256,7 @@ ProxyEndpoints:
         .name: PostClientFlow
         Description: Processed after the response is sent back to the client.
         Response:
-        #{{ if index $.Values.spec.info "x-apigee-logging" }}
-          Step:
-            Name: FC-CloudLogging
-        #{{end}}
+
       HTTPProxyConnection:
         BasePath: {{ include "get_basepath" (index $.Values.spec.servers 0 "url") }}
       RouteRule:
@@ -128,8 +275,11 @@ TargetEndpoints:
         #{{- end }}
         URL: {{ include "get_target_url" $.Values.spec.servers }}
 Resources:
+  #{{ $oasValidation := $.Values.spec.info | dig "x-apigee-oas-validation" dict }}
+  #{{ if $oasValidation | dig "enabled" true }}
   - Resource:
       Type: oas
       #{{ os_writefile "./openapi.yaml" $.Values.spec_string }}
       #{{ remove_oas_extensions "./openapi.yaml" }}
       Path: ./openapi.yaml
+  #{{ end }}

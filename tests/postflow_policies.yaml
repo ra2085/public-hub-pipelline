@@ -1,0 +1,38 @@
+openapi: 3.0.0
+info:
+  title: Test Service (PostFlow Policies)
+  version: 1.0.0
+  description: Test service for global PostFlow policies
+  x-apigee-assign-message:
+    - name: "AM-PreFlow-Response"
+      flow: preflow
+      assignTo:
+        type: response
+      AssignVariable:
+        Name: "preflow_var"
+        Value: "true"
+    - name: "AM-PostFlow-Response"
+      flow: postflow
+      assignTo:
+        type: response
+      AssignVariable:
+        Name: "postflow_var"
+        Value: "true"
+  x-apigee-basic-authentication:
+    - name: "BA-PreFlow-Request"
+      flow: preflow
+      assignTo:
+        type: request
+      user:
+        ref: request.header.user
+      password:
+        ref: request.header.password
+servers:
+  - url: https://api.example.com
+paths:
+  /test:
+    get:
+      operationId: getTest
+      responses:
+        '200':
+          description: OK
